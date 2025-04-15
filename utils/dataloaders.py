@@ -586,6 +586,7 @@ class LoadImagesAndLabels(Dataset):
                         f += [x.replace("./", parent, 1) if x.startswith("./") else x for x in t]  # to global path
                         # f += [p.parent / x.lstrip(os.sep) for x in t]  # to global path (pathlib)
                         print(f, '2')
+                        print(f, '3')
 
                 else:
                     raise FileNotFoundError(f"{prefix}{p} does not exist")
