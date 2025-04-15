@@ -55,9 +55,10 @@ RANK = int(os.getenv("RANK", -1))
 
 # Settings
 NUM_THREADS = min(8, max(1, os.cpu_count() - 1))  # number of YOLOv5 multiprocessing threads
-DATASETS_DIR = Path(os.getenv("YOLOv5_DATASETS_DIR", ROOT / "data/images"))  # global datasets directory
+DATASETS_DIR = Path(os.getenv("YOLOv5_DATASETS_DIR", ROOT / ""))  # global datasets directory
 AUTOINSTALL = str(os.getenv("YOLOv5_AUTOINSTALL", True)).lower() == "true"  # global auto-install mode
 VERBOSE = str(os.getenv("YOLOv5_VERBOSE", True)).lower() == "true"  # global verbose mode
+TQDM_BAR_FORMAT = "{l_bar}{bar:10}{r_bar}"  # tqdm bar format
 TQDM_BAR_FORMAT = "{l_bar}{bar:10}{r_bar}"  # tqdm bar format
 FONT = "Arial.ttf"  # https://github.com/ultralytics/assets/releases/download/v0.0.0/Arial.ttf
 
@@ -330,6 +331,7 @@ def file_size(path):
     """Returns file or directory size in megabytes (MB) for a given path, where directories are recursively summed."""
     mb = 1 << 20  # bytes to MiB (1024 ** 2)
     path = Path(path)
+    print(path)
     if path.is_file():
         return path.stat().st_size / mb
     elif path.is_dir():
@@ -464,6 +466,7 @@ def check_imshow(warn=False):
 
 def check_suffix(file="yolov5s.pt", suffix=(".pt",), msg=""):
     """Validates if a file or files have an acceptable suffix, raising an error if not."""
+    print(file)
     if file and suffix:
         if isinstance(suffix, str):
             suffix = [suffix]
