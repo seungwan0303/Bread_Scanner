@@ -3,6 +3,7 @@
 
 import os
 import random
+from itertools import count
 
 import cv2
 import numpy as np
@@ -220,7 +221,7 @@ class LoadImagesAndLabelsAndMasks(LoadImagesAndLabels):  # for training/testing
                 img = np.fliplr(img)
                 if nl:
                     labels[:, 1] = 1 - labels[:, 1]
-                    masks = torch.flip(masks, dims=[2])
+                    masks = torch.flip(masks.to(torch.uint8), dims=[2])
 
             # Cutouts  # labels = cutout(img, labels, p=0.5)
 
@@ -297,7 +298,8 @@ class LoadImagesAndLabelsAndMasks(LoadImagesAndLabels):  # for training/testing
     @staticmethod
     def collate_fn(batch):
         """Custom collation function for DataLoader, batches images, labels, paths, shapes, and segmentation masks."""
-        img, label, path, shapes, masks = zip(*batch)  # transposed
+        img, label, path, shapes, masks = zip(*batch) # transposed
+        masks = [m.to(torch.uint8) for m in masks] # ✅ Fix: Ensure all masks have the same dtype (e.g., uint8)
         batched_masks = torch.cat(masks, 0)
         for i, l in enumerate(label):
             l[:, 0] = i  # add target image index for build_targets()
@@ -343,7 +345,7 @@ def polygons2masks_overlap(img_size, segments, downsample_ratio=1):
     """Return a (640, 640) overlap mask."""
     masks = np.zeros(
         (img_size[0] // downsample_ratio, img_size[1] // downsample_ratio),
-        dtype=np.int32 if len(segments) > 255 else np.uint8,
+        dtype=np.int32 if len(segments) > 275 else np.uint8,
     )
     areas = []
     ms = []

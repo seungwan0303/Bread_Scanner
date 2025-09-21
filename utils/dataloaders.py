@@ -346,7 +346,6 @@ class LoadImages:
         self.stride = stride
         self.files = images + videos
         self.nf = ni + nv  # number of files
-        print(self.nf)
         self.video_flag = [False] * ni + [True] * nv
         self.mode = "image"
         self.auto = auto

@@ -1,0 +1,13 @@
+train: C:\CVlab_Study\Fortpolio\Bread_Scanner\data\train\images
+val: C:\CVlab_Study\Fortpolio\Bread_Scanner\data\valid\images
+test: C:\CVlab_Study\Fortpolio\Bread_Scanner\data\test\images
+
+nc: 16
+names: ['baguette', 'black', 'bread', 'bun', 'burned', 'cooked', 'integral', 'loaf', 'no_seeds', 'oblong', 'raised', 'round', 'seeds', 'toast', 'uncooked', 'white']
+
+roboflow:
+  workspace: university-qjltn
+  project: bread-segmentation
+  version: 6
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/university-qjltn/bread-segmentation/dataset/6

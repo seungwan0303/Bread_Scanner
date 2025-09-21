@@ -95,6 +95,9 @@ RANK = int(os.getenv("RANK", -1))
 WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
 GIT_INFO = check_git_info()
 
+# print(torch.cuda.device_count())
+# print(torch.cuda.current_device())
+# print(torch.cuda.get_device_name(0))
 
 def train(hyp, opt, device, callbacks):
     """
@@ -175,7 +178,7 @@ def train(hyp, opt, device, callbacks):
     if pretrained:
         with torch_distributed_zero_first(LOCAL_RANK):
             weights = attempt_download(weights)  # download if not found locally
-        ckpt = torch.load(weights, map_location="cpu")  # load checkpoint to CPU to avoid CUDA memory leak
+        ckpt = torch.load(weights, map_location="cpu", weights_only=False)  # load checkpoint to CPU to avoid CUDA memory leak
         model = SegmentationModel(cfg or ckpt["model"].yaml, ch=3, nc=nc, anchors=hyp.get("anchors")).to(device)
         exclude = ["anchor"] if (cfg or hyp.get("anchors")) and not resume else []  # exclude keys
         csd = ckpt["model"].float().state_dict()  # checkpoint state_dict as FP32
@@ -550,7 +553,7 @@ def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--weights", type=str, default=ROOT / "yolov5s-seg.pt", help="initial weights path")
     parser.add_argument("--cfg", type=str, default="", help="model.yaml path")
-    parser.add_argument("--data", type=str, default=ROOT / "data/images/data.yaml", help="dataset.yaml path")
+    parser.add_argument("--data", type=str, default=ROOT / "data/data.yaml", help="dataset.yaml path")
     parser.add_argument("--hyp", type=str, default=ROOT / "data/hyps/hyp.scratch-low.yaml", help="hyperparameters path")
     parser.add_argument("--epochs", type=int, default=100, help="total training epochs")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
@@ -593,7 +596,7 @@ def parse_opt(known=False):
 def main(opt, callbacks=Callbacks()):
     """Initializes training or evolution of YOLOv5 models based on provided configuration and options."""
     if RANK in {-1, 0}:
-        print_args(vars(opt))
+        # print_args(vars(opt))
         check_git_status()
         check_requirements(ROOT / "requirements.txt")
 
@@ -638,7 +641,7 @@ def main(opt, callbacks=Callbacks()):
         assert opt.batch_size % WORLD_SIZE == 0, f"--batch-size {opt.batch_size} must be multiple of WORLD_SIZE"
         assert torch.cuda.device_count() > LOCAL_RANK, "insufficient CUDA devices for DDP command"
         torch.cuda.set_device(LOCAL_RANK)
-        device = torch.device("cuda", LOCAL_RANK)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         dist.init_process_group(backend="nccl" if dist.is_nccl_available() else "gloo")
 
     # Train

@@ -331,7 +331,6 @@ def file_size(path):
     """Returns file or directory size in megabytes (MB) for a given path, where directories are recursively summed."""
     mb = 1 << 20  # bytes to MiB (1024 ** 2)
     path = Path(path)
-    print(path)
     if path.is_file():
         return path.stat().st_size / mb
     elif path.is_dir():

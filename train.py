@@ -35,6 +35,7 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 import yaml
+import multiprocessing as mp
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
@@ -197,7 +198,7 @@ def train(hyp, opt, device, callbacks):
 
     # Config
     plots = not evolve and not opt.noplots  # create plots
-    cuda = device.type != "cpu"
+    cuda = device.type == "gpu"
     init_seeds(opt.seed + 1 + RANK, deterministic=True)
     with torch_distributed_zero_first(LOCAL_RANK):
         data_dict = data_dict or check_dataset(data)  # check if None
@@ -566,7 +567,7 @@ def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--weights", type=str, default=ROOT / "yolov5s.pt", help="initial weights path")
     parser.add_argument("--cfg", type=str, default="", help="model.yaml path")
-    parser.add_argument("--data", type=str, default=ROOT / "data/images/dataset/data.yaml", help="dataset.yaml path")
+    parser.add_argument("--data", type=str, default=ROOT / "data/B_images/data.yaml", help="dataset.yaml path")
     parser.add_argument("--hyp", type=str, default=ROOT / "data/hyps/hyp.scratch-low.yaml", help="hyperparameters path")
     parser.add_argument("--epochs", type=int, default=100, help="total training epochs")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
@@ -982,5 +983,6 @@ def run(**kwargs):
 
 
 if __name__ == "__main__":
+    mp.set_start_method('spawn')
     opt = parse_opt()
     main(opt)
